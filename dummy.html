@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Theeran PVC Panthal - Billing System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<style>
+  body{ 
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+}
+  nav{ 
+    background: #2c3e50; 
+    padding: 1em; 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    color: white; 
+}
+  nav a{
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+    font-weight: bold;
+    font-size: 0.9rem; }
+  .container{ 
+    padding: 15px;
+}
+  .section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px; 
+}
+  input, textarea, button, select {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.95rem; 
+}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px; 
+}
+  th, td {
+    border: 1px solid #999;
+    padding: 8px;
+    font-size: 0.9rem; }
+  th { 
+    background: #222;
+    color: white; 
+}
+  .hidden { 
+    display: none;
+}
+  .table-wrapper { 
+    overflow-x: auto; 
+}
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 10px; 
+}
+  .modal-content { 
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box; 
+}
+  .item-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+  .item-card {
+    background: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    transition: background 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+}
+  .item-card img { 
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px; 
+}
+  .item-card:hover { 
+    background: #f0f0f0;
+}
+  @media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        align-items: flex-start; 
+    }
+    nav a {
+        margin: 5px 0 0 0; 
+    }
+    table th, table td {
+        font-size: 0.85rem;
+        padding: 6px; 
+    }
+  }
+  @media (max-width: 480px) {
+    nav h2 { font-size: 1rem; 
+    }
+    .modal-content {
+        max-width: 95%; 
+    }
+    button, input, select, textarea {
+        font-size: 0.85rem;
+        padding: 8px; 
+    }
+    th, td {
+        font-size: 0.8rem; 
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <h2>Theeran PVC Panthal</h2>
+  <div>
+    <a href="#" onclick="showPage('billing')">Billing</a>
+    <a href="#" onclick="showPage('inventory')">Inventory</a>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Billing Section -->
+  <div id="billingPage" class="page section">
+    <h2>Billing Section</h2>
+    <input type="text" id="custName" placeholder="Customer Name" />
+    <input type="text" id="custMobile" placeholder="Mobile" />
+    <textarea id="custAddress" placeholder="Address"></textarea>
+
+    <h3>Bill Items</h3>
+    <button onclick="openItemModal()">Select Item</button>
+    <div class="table-wrapper">
+      <table id="billTable">
+        <thead>
+          <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3 id="liveTotal">Total: ₹0</h3>
+    <button onclick="generateBill()">Generate Bill</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+    <button onclick="clearAllFields()" style="background:#e74c3c;color:white;">Clear All</button>
+
+    <div id="invoice" class="hidden"></div>
+  </div>
+
+  <!-- Inventory Section -->
+  <div id="inventoryPage" class="page section hidden">
+    <h2>Inventory Management</h2>
+    <input type="text" id="invItemName" placeholder="Item Name" />
+    <label>Has Different Sizes?</label>
+    <select id="hasSizes" onchange="toggleSizeInputs()">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+
+    <div id="defaultPriceSection">
+      <input type="number" id="invItemPrice" placeholder="Item Price" />
+    </div>
+
+    <div id="sizePriceSection" class="hidden">
+      <div id="sizeList"></div>
+      <button onclick="addSizeRow()">Add Size</button>
+    </div>
+
+    <label>Item Image (optional)</label>
+    <input type="file" id="invItemImage" accept="image/*" capture="environment">
+
+    <button onclick="addInventoryItem()">Add Item</button>
+    <div class="table-wrapper">
+      <table id="inventoryTable">
+        <thead><tr><th>Item</th><th>Price / Sizes</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for selecting item in billing -->
+<div id="itemModal" class="modal">
+  <div class="modal-content">
+    <h3>Select Item</h3>
+    <div id="itemGrid" class="item-grid"></div>
+
+    <div id="itemDetails" class="hidden">
+      <h4 id="selectedItemName"></h4>
+      <select id="sizeSelect"></select>
+      <input type="number" id="qtyInput" placeholder="Quantity" min="1" />
+      <button onclick="confirmAddItem()">Add Item</button>
+      <button onclick="backToItemGrid()">Back</button>
+    </div>
+
+    <button onclick="closeItemModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+let items = JSON.parse(localStorage.getItem("items")) || [];
+let billItems = [];
+let selectedItemIndex = null;
+
+function saveItems() { localStorage.setItem("items", JSON.stringify(items)); }
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  if (page === 'billing') document.getElementById("billingPage").classList.remove('hidden');
+  else { document.getElementById("inventoryPage").classList.remove('hidden'); renderInventoryTable(); }
+}
+
+function toggleSizeInputs() {
+  if (document.getElementById("hasSizes").value === "yes") {
+    document.getElementById("defaultPriceSection").classList.add("hidden");
+    document.getElementById("sizePriceSection").classList.remove("hidden");
+  } else {
+    document.getElementById("defaultPriceSection").classList.remove("hidden");
+    document.getElementById("sizePriceSection").classList.add("hidden");
+  }
+}
+
+function addSizeRow() {
+  let div = document.createElement("div");
+  div.innerHTML = `<input placeholder="Size" class="sizeName"/> <input type="number" placeholder="Price" class="sizePrice"/>`;
+  document.getElementById("sizeList").appendChild(div);
+}
+
+function addInventoryItem() {
+  const name = document.getElementById("invItemName").value.trim();
+  const hasSizes = document.getElementById("hasSizes").value === "yes";
+  let item = { name };
+  if (!name) return alert("Enter item name");
+
+  if (hasSizes) {
+    let sizes = [];
+    document.querySelectorAll(".sizeName").forEach((s, i) => {
+      let price = document.querySelectorAll(".sizePrice")[i].value;
+      if (s.value && price) sizes.push({ size: s.value, price: parseFloat(price) });
+    });
+    if (!sizes.length) return alert("Add at least one size and price");
+    item.sizes = sizes;
+  } else {
+    const price = parseFloat(document.getElementById("invItemPrice").value);
+    if (isNaN(price)) return alert("Enter valid price");
+    item.price = price;
+  }
+
+  const imageFile = document.getElementById("invItemImage").files[0];
+  if (imageFile) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      item.image = e.target.result;
+      items.push(item);
+      saveItems();
+      renderInventoryTable();
+    };
+    reader.readAsDataURL(imageFile);
+  } else {
+    items.push(item);
+    saveItems();
+    renderInventoryTable();
+  }
+
+  document.getElementById("invItemName").value = "";
+  document.getElementById("invItemPrice").value = "";
+  document.getElementById("sizeList").innerHTML = "";
+  document.getElementById("invItemImage").value = "";
+}
+
+function renderInventoryTable() {
+  const tbody = document.querySelector("#inventoryTable tbody");
+  tbody.innerHTML = "";
+  items.forEach((item, index) => {
+    let priceInfo = item.sizes ? item.sizes.map(s => `${s.size}: ₹${s.price}`).join(", ") : `₹${item.price}`;
+    tbody.innerHTML += `<tr>
+      <td>${item.name}</td>
+      <td>${priceInfo}</td>
+      <td><button onclick="deleteItem(${index})">Delete</button></td>
+    </tr>`;
+  });
+}
+
+function deleteItem(index) { items.splice(index, 1); saveItems(); renderInventoryTable(); }
+
+function openItemModal() {
+  document.getElementById("itemDetails").classList.add("hidden");
+  const grid = document.getElementById("itemGrid");
+  grid.innerHTML = "";
+  items.forEach((item, i) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    const imgSrc = item.image || "https://via.placeholder.com/100x100?text=No+Image";
+    card.innerHTML = `<img src="${imgSrc}" alt="${item.name}"><strong>${item.name}</strong><br>${item.sizes ? "Multiple Sizes" : "₹" + item.price}`;
+    card.onclick = () => selectItem(i);
+    grid.appendChild(card);
+  });
+  document.getElementById("itemModal").style.display = "flex";
+}
+
+function selectItem(index) {
+  selectedItemIndex = index;
+  const item = items[index];
+  document.getElementById("selectedItemName").textContent = item.name;
+  const sizeSelect = document.getElementById("sizeSelect");
+  sizeSelect.innerHTML = "";
+  if (item.sizes) {
+    sizeSelect.disabled = false;
+    item.sizes.forEach(s => {
+      sizeSelect.innerHTML += `<option value="${s.size}" data-price="${s.price}">${s.size} - ₹${s.price}</option>`;
+    });
+  } else {
+    sizeSelect.disabled = true;
+    sizeSelect.innerHTML = `<option>No size</option>`;
+  }
+  document.getElementById("itemGrid").classList.add("hidden");
+  document.getElementById("itemDetails").classList.remove("hidden");
+}
+
+function backToItemGrid() {
+  document.getElementById("itemDetails").classList.add("hidden");
+  document.getElementById("itemGrid").classList.remove("hidden");
+}
+
+function confirmAddItem() {
+  const item = items[selectedItemIndex];
+  const qty = parseInt(document.getElementById("qtyInput").value);
+  if (!qty || qty <= 0) return alert("Enter valid quantity");
+
+  let size = null;
+  let price = item.price;
+  if (item.sizes) {
+    const selectedOption = document.querySelector("#sizeSelect option:checked");
+    size = selectedOption.value;
+    price = parseFloat(selectedOption.dataset.price);
+  }
+  billItems.push({ name: item.name, size, qty, price });
+  renderBillTable();
+  closeItemModal();
+}
+
+function renderBillTable() {
+  const tbody = document.querySelector("#billTable tbody");
+  tbody.innerHTML = "";
+  let total = 0;
+  billItems.forEach((item, i) => {
+    let rowTotal = item.price * item.qty;
+    total += rowTotal;
+    tbody.innerHTML += `<tr>
+      <td>${item.name}</td>
+      <td>${item.size || '-'}</td>
+      <td>${item.qty}</td>
+      <td>₹${item.price}</td>
+      <td>₹${rowTotal}</td>
+      <td><button onclick="billItems.splice(${i},1);renderBillTable()">Remove</button></td>
+    </tr>`;
+  });
+  document.getElementById("liveTotal").innerText = `Total: ₹${total}`;
+}
+
+function clearAllFields() {
+  document.getElementById("custName").value = "";
+  document.getElementById("custMobile").value = "";
+  document.getElementById("custAddress").value = "";
+  billItems = [];
+  renderBillTable();
+  document.getElementById("invoice").classList.add("hidden");
+}
+
+function generateBill() {
+  if (!billItems.length) return alert("No items in bill.");
+  let grandTotal = billItems.reduce((sum, it) => sum + it.price * it.qty, 0);
+  let html = `<h2>Theeran PVC Panthal</h2><h3>Invoice</h3><table>
+    <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>`;
+  billItems.forEach(it => {
+    html += `<tr><td>${it.name}</td><td>${it.size || '-'}</td><td>${it.qty}</td><td>₹${it.price}</td><td>₹${it.price * it.qty}</td></tr>`;
+  });
+  html += `<tr><th colspan="4">Grand Total</th><th>₹${grandTotal}</th></tr></table>`;
+  document.getElementById("invoice").innerHTML = html;
+  document.getElementById("invoice").classList.remove("hidden");
+}
+
+function downloadPDF() {
+  const invoice = document.getElementById("invoice");
+  if (!invoice.innerHTML.trim()) return alert("Generate bill first.");
+  html2pdf().from(invoice).save();
+}
+
+function closeItemModal() {
+  document.getElementById("itemModal").style.display = "none";
+  document.getElementById("qtyInput").value = "";
+}
+
+showPage('billing');
+</script>
+</body>
+</html>
