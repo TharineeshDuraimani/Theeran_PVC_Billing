@@ -2,145 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Theeran PVC Panthal - Billing System</title>
+<title>Theeran PVC Panthal - Billing System (Supabase)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  body{ 
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    margin: 0;
+  body{font-family:Arial;background:#f4f4f4;margin:0}
+  nav{background:#2c3e50;padding:1em;display:flex;flex-wrap:wrap;justify-content:space-between;color:white}
+  nav a{color:white;text-decoration:none;margin-left:15px;font-weight:bold;font-size:.9rem;cursor:pointer}
+  .container{padding:15px}
+  .section{background:white;padding:15px;border-radius:8px;margin-bottom:20px}
+  input,textarea,button,select{padding:10px;margin:5px 0;width:100%;max-width:100%;font-size:.95rem}
+  table{width:100%;border-collapse:collapse;margin-top:15px}
+  th,td{border:1px solid #999;padding:8px;font-size:.9rem}
+  th{background:#222;color:white}
+  .hidden{display:none}
+  .table-wrapper{overflow-x:auto}
+  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:10px}
+  .modal-content{background:white;padding:15px;border-radius:8px;width:100%;max-width:400px;box-sizing:border-box}
+  .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px}
+  .item-card{background:#fff;padding:8px;border-radius:6px;text-align:center;font-size:.85rem;cursor:pointer;border:1px solid #ccc;transition:background .3s;box-shadow:0 2px 5px rgba(0,0,0,.05)}
+  .item-card img{width:100%;height:100px;object-fit:cover;border-radius:4px;margin-bottom:5px}
+  .item-card:hover{background:#f0f0f0}
+</style>
+<style>
+    /* Basic modal styles */
+    #itemModal {
+  display: none; /* Hide it initially */
 }
-  nav{ 
-    background: #2c3e50; 
-    padding: 1em; 
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    color: white; 
-}
-  nav a{
-    color: white;
-    text-decoration: none;
-    margin-left: 15px;
-    font-weight: bold;
-    font-size: 0.9rem; }
-  .container{ 
-    padding: 15px;
-}
-  .section {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px; 
-}
-  input, textarea, button, select {
-    padding: 10px;
-    margin: 5px 0;
-    width: 100%;
-    max-width: 100%;
-    font-size: 0.95rem; 
-}
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px; 
-}
-  th, td {
-    border: 1px solid #999;
-    padding: 8px;
-    font-size: 0.9rem; }
-  th { 
-    background: #222;
-    color: white; 
-}
-  .hidden { 
-    display: none;
-}
-  .table-wrapper { 
-    overflow-x: auto; 
-}
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-    padding: 10px; 
-}
-  .modal-content { 
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box; 
-}
-  .item-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-  .item-card {
-    background: #fff;
-    padding: 8px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    transition: background 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-}
-  .item-card img { 
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 5px; 
-}
-  .item-card:hover { 
-    background: #f0f0f0;
-}
-  @media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        align-items: flex-start; 
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
     }
-    nav a {
-        margin: 5px 0 0 0; 
-    }
-    table th, table td {
-        font-size: 0.85rem;
-        padding: 6px; 
-    }
-  }
-  @media (max-width: 480px) {
-    nav h2 { font-size: 1rem; 
+    .modal.hidden {
+      display: none;
     }
     .modal-content {
-        max-width: 95%; 
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      position: relative;
     }
-    button, input, select, textarea {
-        font-size: 0.85rem;
-        padding: 8px; 
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 22px;
+      cursor: pointer;
     }
-    th, td {
-        font-size: 0.8rem; 
-    }
-  }
-</style>
+    </style>
 </head>
 <body>
-
 <nav>
   <h2>Theeran PVC Panthal</h2>
   <div>
-    <a href="#" onclick="showPage('billing')">Billing</a>
-    <a href="#" onclick="showPage('inventory')">Inventory</a>
+    <a onclick="showPage('billing')">Billing</a>
+    <a onclick="showPage('inventory')">Inventory</a>
+    <a onclick="showPage('bills')">Show Bills</a>
   </div>
 </nav>
 
@@ -164,7 +93,7 @@
     </div>
 
     <h3 id="liveTotal">Total: ₹0</h3>
-    <button onclick="generateBill()">Generate Bill</button>
+    <button onclick="generateAndSaveBill()">Generate & Save Bill</button>
     <button onclick="downloadPDF()">Download PDF</button>
     <button onclick="clearAllFields()" style="background:#e74c3c;color:white;">Clear All</button>
 
@@ -201,7 +130,42 @@
       </table>
     </div>
   </div>
-</div>
+
+  <!-- Bills Page -->
+<div id="billsPage" class="page section hidden">
+    <h2>All Bills</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Bill ID</th><th>Customer</th><th>Mobile</th><th>Total</th><th>Date</th></tr>
+        </thead>
+        <tbody id="billsTable"></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Bill Details Modal -->
+  <div id="billModal" class="modal hidden">
+    <div class="modal-content" style="max-width:700px;">
+      <span class="close-btn" onclick="closeBillModal()">&times;</span>
+      <h3>Bill Details</h3>
+      <p><strong>Customer:</strong> <span id="detailCustomer"></span></p>
+      <p><strong>Mobile:</strong> <span id="detailMobile"></span></p>
+      <p><strong>Address:</strong> <span id="detailAddress"></span></p>
+      <p><strong>Total:</strong> ₹<span id="detailTotal"></span></p>
+      <p><strong>Date:</strong> <span id="detailDate"></span></p>
+  
+      <h3>Bill Items</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+          </thead>
+          <tbody id="billItemsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
 <!-- Modal for selecting item in billing -->
 <div id="itemModal" class="modal">
@@ -221,202 +185,460 @@
   </div>
 </div>
 
-<script>
-let items = JSON.parse(localStorage.getItem("items")) || [];
-let billItems = [];
-let selectedItemIndex = null;
 
-function saveItems() { localStorage.setItem("items", JSON.stringify(items)); }
+<!-- Supabase client -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-function showPage(page) {
+  // ---------- CONFIG: paste your Supabase creds here ----------
+  const SUPABASE_URL = 'https://kaqtxgaruzuxfrqqpmnv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthcXR4Z2FydXp1eGZycXFwbW52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MzY1MTksImV4cCI6MjA3MDQxMjUxOX0.eTYtxYBziDJWtkVtcAM57RJT7nzx9ydqs1qKArg6sRI';
+  // ------------------------------------------------------------
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    alert('Set SUPABASE_URL and SUPABASE_ANON_KEY in the script.');
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const STORAGE_BUCKET = 'item-images';
+
+  // Local UI state
+  let items = []; // loaded from Supabase
+  let billItems = [];
+  let selectedItemIndex = null; // index in items array
+
+  // INIT
+  document.addEventListener('DOMContentLoaded', () => {
+    showPage('billing');
+    loadItemsFromSupabase();
+  });
+
+  // ---------- UI helpers ----------
+  function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-  if (page === 'billing') document.getElementById("billingPage").classList.remove('hidden');
-  else { document.getElementById("inventoryPage").classList.remove('hidden'); renderInventoryTable(); }
-}
-
-function toggleSizeInputs() {
-  if (document.getElementById("hasSizes").value === "yes") {
-    document.getElementById("defaultPriceSection").classList.add("hidden");
-    document.getElementById("sizePriceSection").classList.remove("hidden");
-  } else {
-    document.getElementById("defaultPriceSection").classList.remove("hidden");
-    document.getElementById("sizePriceSection").classList.add("hidden");
+  if(page === 'billing') document.getElementById('billingPage').classList.remove('hidden');
+  if(page === 'inventory') document.getElementById('inventoryPage').classList.remove('hidden');
+  if(page === 'bills') { 
+    document.getElementById('billsPage').classList.remove('hidden'); 
+    loadBills();
   }
 }
 
-function addSizeRow() {
-  let div = document.createElement("div");
-  div.innerHTML = `<input placeholder="Size" class="sizeName"/> <input type="number" placeholder="Price" class="sizePrice"/>`;
-  document.getElementById("sizeList").appendChild(div);
-}
+// Load bills
+async function loadBills() {
+  const { data, error } = await supabase
+    .from("bills")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-function addInventoryItem() {
-  const name = document.getElementById("invItemName").value.trim();
-  const hasSizes = document.getElementById("hasSizes").value === "yes";
-  let item = { name };
-  if (!name) return alert("Enter item name");
-
-  if (hasSizes) {
-    let sizes = [];
-    document.querySelectorAll(".sizeName").forEach((s, i) => {
-      let price = document.querySelectorAll(".sizePrice")[i].value;
-      if (s.value && price) sizes.push({ size: s.value, price: parseFloat(price) });
-    });
-    if (!sizes.length) return alert("Add at least one size and price");
-    item.sizes = sizes;
-  } else {
-    const price = parseFloat(document.getElementById("invItemPrice").value);
-    if (isNaN(price)) return alert("Enter valid price");
-    item.price = price;
+  if (error) {
+    console.error(error);
+    return;
   }
 
-  const imageFile = document.getElementById("invItemImage").files[0];
-  if (imageFile) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      item.image = e.target.result;
-      items.push(item);
-      saveItems();
-      renderInventoryTable();
-    };
-    reader.readAsDataURL(imageFile);
+  const tbody = document.getElementById("billsTable");
+  tbody.innerHTML = "";
+
+  data.forEach(bill => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${bill.id}</td>
+      <td>${bill.customer_name || ""}</td>
+      <td>${bill.mobile || ""}</td>
+      <td>₹${bill.total}</td>
+      <td>${new Date(bill.created_at).toLocaleString()}</td>
+    `;
+    tr.style.cursor = "pointer";
+    tr.onclick = () => viewBill(bill.id);
+    tbody.appendChild(tr);
+  });
+}
+
+// View bill in modal
+async function viewBill(billId) {
+  // Fetch bill details
+  const { data: billData, error: billError } = await supabase
+    .from("bills")
+    .select("*")
+    .eq("id", billId)
+    .single();
+
+  if (billError) {
+    console.error(billError);
+    return;
+  }
+
+  // Fill in bill details
+  document.getElementById("detailCustomer").textContent = billData.customer_name || "";
+  document.getElementById("detailMobile").textContent = billData.mobile || "";
+  document.getElementById("detailAddress").textContent = billData.address || "";
+  document.getElementById("detailTotal").textContent = billData.total;
+  document.getElementById("detailDate").textContent = new Date(billData.created_at).toLocaleString();
+
+  // Fetch bill items
+  const { data: itemsData, error: itemsError } = await supabase
+    .from("bill_items")
+    .select("*")
+    .eq("bill_id", billId);
+
+  if (itemsError) {
+    console.error(itemsError);
+    return;
+  }
+
+  // Render bill items
+  document.getElementById("billItemsTable").innerHTML = itemsData.map(item => `
+    <tr>
+      <td>${item.name}</td>
+      <td>${item.size || ""}</td>
+      <td>${item.qty}</td>
+      <td>₹${item.price}</td>
+      <td>₹${item.total}</td>
+    </tr>
+  `).join("");
+
+  // Show modal
+  document.getElementById("billModal").classList.remove("hidden");
+}
+
+// Close modal
+function closeBillModal() {
+  // Get the modal container
+  const modal = document.getElementById("billModal");
+  
+  // Hide the modal using the CSS class system
+  if (modal) {
+    modal.classList.add("hidden");
   } else {
-    items.push(item);
-    saveItems();
+    console.error("Modal container not found");
+  }
+}
+
+  function toggleSizeInputs() {
+    if (document.getElementById("hasSizes").value === "yes") {
+      document.getElementById("defaultPriceSection").classList.add("hidden");
+      document.getElementById("sizePriceSection").classList.remove("hidden");
+    } else {
+      document.getElementById("defaultPriceSection").classList.remove("hidden");
+      document.getElementById("sizePriceSection").classList.add("hidden");
+    }
+  }
+
+  function addSizeRow() {
+    let div = document.createElement("div");
+    div.innerHTML = `<input placeholder="Size" class="sizeName"/> <input type="number" placeholder="Price" class="sizePrice"/>`;
+    document.getElementById("sizeList").appendChild(div);
+  }
+
+  // ---------- Supabase actions ----------
+  async function loadItemsFromSupabase() {
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) return console.error('Load items error', error);
+    items = data.map(it => {
+      // if sizes stored as JSON string, ensure parsed
+      if (typeof it.sizes === 'string') {
+        try { it.sizes = JSON.parse(it.sizes); } catch(e){ }
+      }
+      // build public image url if image_path exists
+      if (it.image_path) {
+        // if bucket is public, you can construct url: `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${it.image_path}`
+        it.image_url = `${SUPABASE_URL.replace('https://','https://')}/storage/v1/object/public/${STORAGE_BUCKET}/${encodeURIComponent(it.image_path)}`;
+      }
+      return it;
+    }); 
+    // update UI if inventory page visible
     renderInventoryTable();
   }
 
-  document.getElementById("invItemName").value = "";
-  document.getElementById("invItemPrice").value = "";
-  document.getElementById("sizeList").innerHTML = "";
-  document.getElementById("invItemImage").value = "";
-}
+  async function addInventoryItem() {
+    const name = document.getElementById("invItemName").value.trim();
+    const hasSizes = document.getElementById("hasSizes").value === "yes";
+    if (!name) return alert("Enter item name");
 
-function renderInventoryTable() {
-  const tbody = document.querySelector("#inventoryTable tbody");
-  tbody.innerHTML = "";
-  items.forEach((item, index) => {
-    let priceInfo = item.sizes ? item.sizes.map(s => `${s.size}: ₹${s.price}`).join(", ") : `₹${item.price}`;
-    tbody.innerHTML += `<tr>
-      <td>${item.name}</td>
-      <td>${priceInfo}</td>
-      <td><button onclick="deleteItem(${index})">Delete</button></td>
-    </tr>`;
-  });
-}
+    let payload = { name };
 
-function deleteItem(index) { items.splice(index, 1); saveItems(); renderInventoryTable(); }
+    if (hasSizes) {
+      let sizes = [];
+      document.querySelectorAll(".sizeName").forEach((s, i) => {
+        let price = document.querySelectorAll(".sizePrice")[i].value;
+        if (s.value && price) sizes.push({ size: s.value, price: parseFloat(price) });
+      });
+      if (!sizes.length) return alert("Add at least one size and price");
+      payload.sizes = sizes;
+      payload.price = null;
+    } else {
+      const price = parseFloat(document.getElementById("invItemPrice").value);
+      if (isNaN(price)) return alert("Enter valid price");
+      payload.price = price;
+      payload.sizes = null;
+    }
 
-function openItemModal() {
-  document.getElementById("itemDetails").classList.add("hidden");
-  const grid = document.getElementById("itemGrid");
-  grid.innerHTML = "";
-  items.forEach((item, i) => {
-    const card = document.createElement("div");
-    card.className = "item-card";
-    const imgSrc = item.image || "https://via.placeholder.com/100x100?text=No+Image";
-    card.innerHTML = `<img src="${imgSrc}" alt="${item.name}"><strong>${item.name}</strong><br>${item.sizes ? "Multiple Sizes" : "₹" + item.price}`;
-    card.onclick = () => selectItem(i);
-    grid.appendChild(card);
-  });
-  document.getElementById("itemModal").style.display = "flex";
-}
+    const imageFile = document.getElementById("invItemImage").files[0];
+    if (imageFile) {
+      // upload to storage with unique name
+      const filename = `${Date.now()}_${imageFile.name.replace(/\s+/g,'_')}`;
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filename, imageFile, { cacheControl: '3600', upsert: false });
 
-function selectItem(index) {
-  selectedItemIndex = index;
-  const item = items[index];
-  document.getElementById("selectedItemName").textContent = item.name;
-  const sizeSelect = document.getElementById("sizeSelect");
-  sizeSelect.innerHTML = "";
-  if (item.sizes) {
-    sizeSelect.disabled = false;
-    item.sizes.forEach(s => {
-      sizeSelect.innerHTML += `<option value="${s.size}" data-price="${s.price}">${s.size} - ₹${s.price}</option>`;
+      if (uploadError) {
+        console.error('Upload error', uploadError);
+        return alert('Image upload failed');
+      }
+      payload.image_path = filename;
+    }
+
+    // insert into items table
+    const { data, error } = await supabase
+      .from('items')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Insert item error', error);
+      return alert('Failed to add item');
+    }
+
+    // clear form
+    document.getElementById("invItemName").value = "";
+    document.getElementById("invItemPrice").value = "";
+    document.getElementById("sizeList").innerHTML = "";
+    document.getElementById("invItemImage").value = "";
+
+    await loadItemsFromSupabase();
+    alert('Item added to inventory ✅');
+  }
+
+  async function deleteItem(id, image_path) {
+    if (!confirm('Delete this item?')) return;
+    // delete DB row
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Delete error', error);
+      return alert('Failed to delete item');
+    }
+
+    // delete image from storage (if any)
+    if (image_path) {
+      await supabase.storage.from(STORAGE_BUCKET).remove([image_path]);
+    }
+
+    await loadItemsFromSupabase();
+  }
+
+  // ---------- Inventory render ----------
+  function renderInventoryTable() {
+    const tbody = document.querySelector("#inventoryTable tbody");
+    tbody.innerHTML = "";
+    items.forEach((item, index) => {
+      let priceInfo = item.sizes ? item.sizes.map(s => `${s.size}: ₹${s.price}`).join(", ") : `₹${item.price}`;
+      let img = item.image_url ? `<img src="${item.image_url}" alt="${item.name}" style="width:80px;height:60px;object-fit:cover;border-radius:4px;margin-right:8px">` : '';
+      tbody.innerHTML += `<tr>
+        <td style="display:flex;align-items:center">${img}<div>${item.name}</div></td>
+        <td>${priceInfo}</td>
+        <td>
+          <button onclick="deleteItem(${item.id}, '${item.image_path || ''}')">Delete</button>
+        </td>
+      </tr>`;
     });
-  } else {
-    sizeSelect.disabled = true;
-    sizeSelect.innerHTML = `<option>No size</option>`;
   }
-  document.getElementById("itemGrid").classList.add("hidden");
-  document.getElementById("itemDetails").classList.remove("hidden");
-}
 
-function backToItemGrid() {
-  document.getElementById("itemDetails").classList.add("hidden");
-  document.getElementById("itemGrid").classList.remove("hidden");
-}
-
-function confirmAddItem() {
-  const item = items[selectedItemIndex];
-  const qty = parseInt(document.getElementById("qtyInput").value);
-  if (!qty || qty <= 0) return alert("Enter valid quantity");
-
-  let size = null;
-  let price = item.price;
-  if (item.sizes) {
-    const selectedOption = document.querySelector("#sizeSelect option:checked");
-    size = selectedOption.value;
-    price = parseFloat(selectedOption.dataset.price);
+  // ---------- Billing modal & logic ----------
+  function openItemModal() {
+    document.getElementById("itemDetails").classList.add("hidden");
+    const grid = document.getElementById("itemGrid");
+    grid.innerHTML = "";
+    items.forEach((item, i) => {
+      const card = document.createElement("div");
+      card.className = "item-card";
+      const imgSrc = item.image_url || "https://via.placeholder.com/100x100?text=No+Image";
+      const priceText = item.sizes ? "Multiple Sizes" : "₹" + item.price;
+      card.innerHTML = `<img src="${imgSrc}" alt="${item.name}"><strong>${item.name}</strong><br>${priceText}`;
+      card.onclick = () => selectItem(i);
+      grid.appendChild(card);
+    });
+    document.getElementById("itemModal").style.display = "flex";
   }
-  billItems.push({ name: item.name, size, qty, price });
-  renderBillTable();
-  closeItemModal();
-}
 
-function renderBillTable() {
-  const tbody = document.querySelector("#billTable tbody");
-  tbody.innerHTML = "";
-  let total = 0;
-  billItems.forEach((item, i) => {
-    let rowTotal = item.price * item.qty;
-    total += rowTotal;
-    tbody.innerHTML += `<tr>
-      <td>${item.name}</td>
-      <td>${item.size || '-'}</td>
-      <td>${item.qty}</td>
-      <td>₹${item.price}</td>
-      <td>₹${rowTotal}</td>
-      <td><button onclick="billItems.splice(${i},1);renderBillTable()">Remove</button></td>
-    </tr>`;
-  });
-  document.getElementById("liveTotal").innerText = `Total: ₹${total}`;
-}
+  function selectItem(index) {
+    selectedItemIndex = index;
+    const item = items[index];
+    document.getElementById("selectedItemName").textContent = item.name;
+    const sizeSelect = document.getElementById("sizeSelect");
+    sizeSelect.innerHTML = "";
+    if (item.sizes && item.sizes.length) {
+      sizeSelect.disabled = false;
+      item.sizes.forEach((s, idx) => {
+        sizeSelect.innerHTML += `<option value="${s.size}" data-price="${s.price}" data-index="${idx}">${s.size} - ₹${s.price}</option>`;
+      });
+    } else {
+      sizeSelect.disabled = true;
+      sizeSelect.innerHTML = `<option data-price="${item.price}">No size</option>`;
+    }
+    document.getElementById("itemGrid").classList.add("hidden");
+    document.getElementById("itemDetails").classList.remove("hidden");
+  }
 
-function clearAllFields() {
-  document.getElementById("custName").value = "";
-  document.getElementById("custMobile").value = "";
-  document.getElementById("custAddress").value = "";
-  billItems = [];
-  renderBillTable();
-  document.getElementById("invoice").classList.add("hidden");
-}
+  function backToItemGrid() {
+    document.getElementById("itemDetails").classList.add("hidden");
+    document.getElementById("itemGrid").classList.remove("hidden");
+  }
 
-function generateBill() {
-  if (!billItems.length) return alert("No items in bill.");
-  let grandTotal = billItems.reduce((sum, it) => sum + it.price * it.qty, 0);
-  let html = `<h2>Theeran PVC Panthal</h2><h3>Invoice</h3><table>
-    <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>`;
-  billItems.forEach(it => {
-    html += `<tr><td>${it.name}</td><td>${it.size || '-'}</td><td>${it.qty}</td><td>₹${it.price}</td><td>₹${it.price * it.qty}</td></tr>`;
-  });
-  html += `<tr><th colspan="4">Grand Total</th><th>₹${grandTotal}</th></tr></table>`;
-  document.getElementById("invoice").innerHTML = html;
-  document.getElementById("invoice").classList.remove("hidden");
-}
+  function confirmAddItem() {
+    const item = items[selectedItemIndex];
+    const qty = parseInt(document.getElementById("qtyInput").value);
+    if (!qty || qty <= 0) return alert("Enter valid quantity");
 
-function downloadPDF() {
-  const invoice = document.getElementById("invoice");
-  if (!invoice.innerHTML.trim()) return alert("Generate bill first.");
-  html2pdf().from(invoice).save();
-}
+    let size = null;
+    let price = item.price;
+    if (item.sizes && item.sizes.length) {
+      const selectedOption = document.querySelector("#sizeSelect option:checked");
+      size = selectedOption.value;
+      price = parseFloat(selectedOption.dataset.price);
+    }
+    billItems.push({ item_id: item.id, name: item.name, size, qty, price });
+    renderBillTable();
+    closeItemModal();
+  }
 
-function closeItemModal() {
-  document.getElementById("itemModal").style.display = "none";
-  document.getElementById("qtyInput").value = "";
-}
+  function renderBillTable() {
+    const tbody = document.querySelector("#billTable tbody");
+    tbody.innerHTML = "";
+    let total = 0;
+    billItems.forEach((item, i) => {
+      let rowTotal = item.price * item.qty;
+      total += rowTotal;
+      tbody.innerHTML += `<tr>
+        <td>${item.name}</td>
+        <td>${item.size || '-'}</td>
+        <td>${item.qty}</td>
+        <td>₹${item.price}</td>
+        <td>₹${rowTotal}</td>
+        <td><button onclick="removeBillItem(${i})">Remove</button></td>
+      </tr>`;
+    });
+    document.getElementById("liveTotal").innerText = `Total: ₹${total}`;
+  }
 
-showPage('billing');
+  function removeBillItem(i) {
+    billItems.splice(i,1);
+    renderBillTable();
+  }
+
+  function clearAllFields() {
+    document.getElementById("custName").value = "";
+    document.getElementById("custMobile").value = "";
+    document.getElementById("custAddress").value = "";
+    billItems = [];
+    renderBillTable();
+    document.getElementById("invoice").classList.add("hidden");
+  }
+
+  async function generateAndSaveBill() {
+    if (!billItems.length) return alert("No items in bill.");
+    let grandTotal = billItems.reduce((sum, it) => sum + it.price * it.qty, 0);
+
+    // Insert bill
+    const customer_name = document.getElementById("custName").value.trim();
+    const mobile = document.getElementById("custMobile").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+
+    const { data: billData, error: billError } = await supabase
+      .from('bills')
+      .insert([{ customer_name, mobile, address, total: grandTotal }])
+      .select()
+      .single();
+
+    if (billError) {
+      console.error('Insert bill error', billError);
+      return alert('Failed to save bill');
+    }
+
+    const bill_id = billData.id;
+
+    // Insert bill items
+    const itemsPayload = billItems.map(it => ({
+      bill_id,
+      item_id: it.item_id,
+      name: it.name,
+      size: it.size,
+      qty: it.qty,
+      price: it.price,
+      total: it.qty * it.price
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('bill_items')
+      .insert(itemsPayload);
+
+    if (itemsError) {
+      console.error('Insert bill_items error', itemsError);
+      // optionally roll back by deleting bill
+      return alert('Failed to save bill items');
+    }
+
+    // Build and show invoice html (same as earlier)
+    let html = `<h2>Theeran PVC Panthal</h2><h3>Invoice</h3><p><strong>Bill ID:</strong> ${bill_id}</p>`;
+    if (customer_name) html += `<p><strong>Customer:</strong> ${escapeHtml(customer_name)} ${mobile ? '- ' + escapeHtml(mobile) : ''}</p>`;
+    if (address) html += `<p><strong>Address:</strong> ${escapeHtml(address)}</p>`;
+    html += `<table style="width:100%;border-collapse:collapse;"><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>`;
+    billItems.forEach(it => {
+      html += `<tr><td>${escapeHtml(it.name)}</td><td>${escapeHtml(it.size || '-')}</td><td>${it.qty}</td><td>₹${it.price}</td><td>₹${it.price * it.qty}</td></tr>`;
+    });
+    html += `<tr><th colspan="4">Grand Total</th><th>₹${grandTotal}</th></tr></table>`;
+    document.getElementById("invoice").innerHTML = html;
+    document.getElementById("invoice").classList.remove("hidden");
+
+    // clear UI selections but keep invoice visible
+    billItems = [];
+    renderBillTable();
+    alert('Bill saved to Supabase ✅\nBill ID: ' + bill_id);
+  }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  
+  function downloadPDF() {
+    const invoice = document.getElementById("invoice");
+    if (!invoice.innerHTML.trim()) return alert("Generate bill first.");
+    html2pdf().from(invoice).save();
+  }
+
+  function closeItemModal() {
+    document.getElementById("itemModal").style.display = "none";
+    document.getElementById("qtyInput").value = "";
+  }
+  // expose functions to window for inline onclick
+  window.showPage = showPage;
+  window.toggleSizeInputs = toggleSizeInputs;
+  window.addSizeRow = addSizeRow;
+  window.addInventoryItem = addInventoryItem;
+  window.openItemModal = openItemModal;
+  window.selectItem = selectItem;
+  window.backToItemGrid = backToItemGrid;
+  window.confirmAddItem = confirmAddItem;
+  window.renderInventoryTable = renderInventoryTable;
+  window.deleteItem = deleteItem;
+  window.removeBillItem = removeBillItem;
+  window.clearAllFields = clearAllFields;
+  window.generateAndSaveBill = generateAndSaveBill;
+  window.downloadPDF = downloadPDF;
+  window.closeItemModal = closeItemModal;
+  window.closeBillModal = closeBillModal;
+  window.viewBill = viewBill;
+
+
 </script>
 </body>
 </html>
-
