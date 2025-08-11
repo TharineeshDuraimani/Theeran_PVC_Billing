@@ -8,7 +8,7 @@
 <style>
   body{font-family:Arial;background:#f4f4f4;margin:0}
   nav{background:#2c3e50;padding:1em;display:flex;flex-wrap:wrap;justify-content:space-between;color:white}
-  nav a{color:white;text-decoration:none;margin-left:15px;font-weight:bold;font-size:.9rem;cursor:pointer}
+  nav a{color:white;text-decoration:none;margin-left:50px;font-weight:bold;font-size:.9rem;cursor:pointer;margin-top: 100px;}
   .container{padding:15px}
   .section{background:white;padding:15px;border-radius:8px;margin-bottom:20px}
   input,textarea,button,select{padding:10px;margin:5px 0;width:100%;max-width:100%;font-size:.95rem}
@@ -65,67 +65,67 @@
 </head>
 <body>
 <nav>
-  <h2>Theeran PVC Panthal</h2>
+  <h2>தீரன் PVC பந்தல்</h2>
   <div>
-    <a onclick="showPage('billing')">Billing</a>
-    <a onclick="showPage('inventory')">Inventory</a>
-    <a onclick="showPage('bills')">Show Bills</a>
+    <a onclick="showPage('billing')">பில்லிங்</a>
+    <a onclick="showPage('inventory')">சரக்கு</a>
+    <a onclick="showPage('bills')">பில்ல்களை காண்க</a>
   </div>
 </nav>
 
 <div class="container">
   <!-- Billing Section -->
   <div id="billingPage" class="page section">
-    <h2>Billing Section</h2>
-    <input type="text" id="custName" placeholder="Customer Name" />
-    <input type="text" id="custMobile" placeholder="Mobile" />
-    <textarea id="custAddress" placeholder="Address"></textarea>
+    <h2>பில்லிங் பகுதி</h2>
+    <input type="text" id="custName" placeholder="வாடிக்கையாளர் பெயர்" />
+    <input type="text" id="custMobile" placeholder="மொபைல்" />
+    <textarea id="custAddress" placeholder="முகவரி"></textarea>
 
-    <h3>Bill Items</h3>
-    <button onclick="openItemModal()">Select Item</button>
+    <h3>பில் உருப்படிகள்</h3>
+    <button onclick="openItemModal()">உருப்படியை தேர்ந்தெடுக்கவும்</button>
     <div class="table-wrapper">
       <table id="billTable">
         <thead>
-          <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th>Actions</th></tr>
+          <tr><th>உருப்படிகள்</th><th>அளவு</th><th>Qty</th><th>விலை</th><th>மொத்தம்</th><th>செயல்கள்</th></tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <h3 id="liveTotal">Total: ₹0</h3>
-    <button onclick="generateAndSaveBill()">Generate & Save Bill</button>
-    <button onclick="downloadPDF()">Download PDF</button>
-    <button onclick="clearAllFields()" style="background:#e74c3c;color:white;">Clear All</button>
+    <h3 id="liveTotal">மொத்தம்: ₹0</h3>
+    <button onclick="generateAndSaveBill()">பில் உருவாக்கவும் & சேமிக்கவும்</button>
+    <button onclick="downloadPDF()">PDF ஐ பதிவிறக்கம் செய்யவும்</button>
+    <button onclick="clearAllFields()" style="background:#e74c3c;color:white;">அனைத்தையும் அழிக்கவும்</button>
 
     <div id="invoice" class="hidden"></div>
   </div>
 
   <!-- Inventory Section -->
   <div id="inventoryPage" class="page section hidden">
-    <h2>Inventory Management</h2>
-    <input type="text" id="invItemName" placeholder="Item Name" />
-    <label>Has Different Sizes?</label>
+    <h2>சரக்கு மேலாண்மை</h2>
+    <input type="text" id="invItemName" placeholder="உருப்படி பெயர்" />
+    <label>பல்வேறு அளவுகள் உள்ளனவா?</label>
     <select id="hasSizes" onchange="toggleSizeInputs()">
-      <option value="no">No</option>
-      <option value="yes">Yes</option>
+      <option value="no">இல்லை</option>
+      <option value="yes">ஆம்</option>
     </select>
 
     <div id="defaultPriceSection">
-      <input type="number" id="invItemPrice" placeholder="Item Price" />
+      <input type="number" id="invItemPrice" placeholder="உருப்படியின் விலை" />
     </div>
 
     <div id="sizePriceSection" class="hidden">
       <div id="sizeList"></div>
-      <button onclick="addSizeRow()">Add Size</button>
+      <button onclick="addSizeRow()">அளவு சேர்க்கவும்</button>
     </div>
 
-    <label>Item Image (optional)</label>
+    <label>உருப்படி படம் (விருப்பமான)</label>
     <input type="file" id="invItemImage" accept="image/*" capture="environment">
 
-    <button onclick="addInventoryItem()">Add Item</button>
+    <button onclick="addInventoryItem()">உருப்படியைச் சேர்க்கவும்</button>
     <div class="table-wrapper">
       <table id="inventoryTable">
-        <thead><tr><th>Item</th><th>Price / Sizes</th><th>Actions</th></tr></thead>
+        <thead><tr><th>உருப்படிகள்</th><th>விலை / அளவுகள்</th><th>செயல்கள்</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -133,11 +133,11 @@
 
   <!-- Bills Page -->
 <div id="billsPage" class="page section hidden">
-    <h2>All Bills</h2>
+    <h2>அனைத்து பில்ல்கள்</h2>
     <div class="table-wrapper">
       <table>
         <thead>
-          <tr><th>Bill ID</th><th>Customer</th><th>Mobile</th><th>Total</th><th>Date</th></tr>
+          <tr><th>பில் ஐடி</th><th>வாடிக்கையாளர்</th><th>மொபைல்</th><th>மொத்தம்</th><th>தேதி</th></tr>
         </thead>
         <tbody id="billsTable"></tbody>
       </table>
@@ -148,18 +148,18 @@
   <div id="billModal" class="modal hidden">
     <div class="modal-content" style="max-width:700px;">
       <span class="close-btn" onclick="closeBillModal()">&times;</span>
-      <h3>Bill Details</h3>
-      <p><strong>Customer:</strong> <span id="detailCustomer"></span></p>
-      <p><strong>Mobile:</strong> <span id="detailMobile"></span></p>
-      <p><strong>Address:</strong> <span id="detailAddress"></span></p>
-      <p><strong>Total:</strong> ₹<span id="detailTotal"></span></p>
-      <p><strong>Date:</strong> <span id="detailDate"></span></p>
-  
-      <h3>Bill Items</h3>
+      <h3>பில் விவரங்கள்</h3>
+      <p><strong>வாடிக்கையாளர்:</strong> <span id="detailCustomer"></span></p>
+      <p><strong>மொபைல்:</strong> <span id="detailMobile"></span></p>
+      <p><strong>முகவரி:</strong> <span id="detailAddress"></span></p>
+      <p><strong>மொத்தம்:</strong> ₹<span id="detailTotal"></span></p>
+      <p><strong>தேதி:</strong> <span id="detailDate"></span></p>
+
+      <h3>பில் உருப்படிகள்</h3>
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+            <tr><th>உருப்படி</th><th>அளவு</th><th>Qty</th><th>விலை</th><th>மொத்தம்</th></tr>
           </thead>
           <tbody id="billItemsTable"></tbody>
         </table>
@@ -170,18 +170,18 @@
 <!-- Modal for selecting item in billing -->
 <div id="itemModal" class="modal">
   <div class="modal-content">
-    <h3>Select Item</h3>
+    <h3>உருப்படியைத் தேர்ந்தெடுக்கவும்</h3>
     <div id="itemGrid" class="item-grid"></div>
 
     <div id="itemDetails" class="hidden">
       <h4 id="selectedItemName"></h4>
       <select id="sizeSelect"></select>
-      <input type="number" id="qtyInput" placeholder="Quantity" min="1" />
-      <button onclick="confirmAddItem()">Add Item</button>
-      <button onclick="backToItemGrid()">Back</button>
+      <input type="number" id="qtyInput" placeholder="அளவு" min="1" />
+      <button onclick="confirmAddItem()">உருப்படியைச் சேர்க்கவும்</button>
+      <button onclick="backToItemGrid()">மீண்டும்</button>
     </div>
 
-    <button onclick="closeItemModal()">Cancel</button>
+    <button onclick="closeItemModal()">ரத்து செய்யவும்</button>
   </div>
 </div>
 
@@ -586,17 +586,67 @@ function closeBillModal() {
       return alert('Failed to save bill items');
     }
 
-    // Build and show invoice html (same as earlier)
-    let html = `<h2>Theeran PVC Panthal</h2><h3>Invoice</h3><p><strong>Bill ID:</strong> ${bill_id}</p>`;
-    if (customer_name) html += `<p><strong>Customer:</strong> ${escapeHtml(customer_name)} ${mobile ? '- ' + escapeHtml(mobile) : ''}</p>`;
-    if (address) html += `<p><strong>Address:</strong> ${escapeHtml(address)}</p>`;
-    html += `<table style="width:100%;border-collapse:collapse;"><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr>`;
-    billItems.forEach(it => {
-      html += `<tr><td>${escapeHtml(it.name)}</td><td>${escapeHtml(it.size || '-')}</td><td>${it.qty}</td><td>₹${it.price}</td><td>₹${it.price * it.qty}</td></tr>`;
-    });
-    html += `<tr><th colspan="4">Grand Total</th><th>₹${grandTotal}</th></tr></table>`;
-    document.getElementById("invoice").innerHTML = html;
-    document.getElementById("invoice").classList.remove("hidden");
+    // Build and show invoice html
+// Build and show invoice html in new style
+let html = `
+  <div style="font-family:Arial, sans-serif;max-width:800px;margin:;padding:50px;border:1px solid #ccc;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h2 style="margin:0;">தீரன் PVC Panthal</h2>
+        <p style="margin:0;font-size:0.9rem;">Karumathampatti</p>
+      </div>
+      <div style="text-align:right;">
+        <p style="margin:0;"><strong>தேதி:</strong> ${new Date().toLocaleDateString()}</p>
+      </div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:20px;font-size:0.9rem;">
+      <thead>
+        <tr style="background:#222;color:white;">
+          <th style="border:1px solid #999;padding:8px;">No</th>
+          <th style="border:1px solid #999;padding:8px;">பொருள் விளக்கம்</th>
+          <th style="border:1px solid #999;padding:8px;">அளவு</th>
+          <th style="border:1px solid #999;padding:8px;">விலை</th>
+          <th style="border:1px solid #999;padding:8px;">மொத்தம்</th>
+        </tr>
+      </thead>
+      <tbody>
+`;
+
+billItems.forEach((it, idx) => {
+  html += `
+    <tr>
+      <td style="border:1px solid #999;padding:8px;text-align:center;">${idx + 1}</td>
+      <td style="border:1px solid #999;padding:8px;">${escapeHtml(it.name)}${it.size ? ' - ' + escapeHtml(it.size) : ''}</td>
+      <td style="border:1px solid #999;padding:8px;text-align:center;">${it.qty}</td>
+      <td style="border:1px solid #999;padding:8px;text-align:right;">₹${it.price.toFixed(2)}</td>
+      <td style="border:1px solid #999;padding:8px;text-align:right;">₹${(it.price * it.qty).toFixed(2)}</td>
+    </tr>
+  `;
+});
+
+html += `
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="border:1px solid #999;padding:8px;text-align:right;"><strong>Sub Total</strong></td>
+          <td style="border:1px solid #999;padding:8px;text-align:right;">₹${grandTotal.toFixed(2)}</td>
+        </tr>
+        <tr style="background:#222;color:white;">
+          <td colspan="4" style="border:1px solid #999;padding:8px;text-align:right;"><strong>TOTAL</strong></td>
+          <td style="border:1px solid #999;padding:8px;text-align:right;">₹${grandTotal.toFixed(2)}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    </div>
+  </div>
+`;
+
+document.getElementById("invoice").innerHTML = html;
+document.getElementById("invoice").classList.remove("hidden");
+
+
 
     // clear UI selections but keep invoice visible
     billItems = [];
