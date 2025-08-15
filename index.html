@@ -166,6 +166,11 @@
         </table>
       </div>
     </div>
+     <div style="text-align:center; margin-top: 15px;">
+    <button id="downloadBillBtn" style="padding: 10px; background-color: rgb(28, 80, 212); color: white; border: none;">
+      PDF ஐ அச்சிடவும்
+    </button>
+  </div>
   </div>
 
 <!-- Modal for selecting item in billing -->
@@ -670,6 +675,106 @@ document.getElementById("invoice").classList.remove("hidden");
     document.getElementById("itemModal").style.display = "none";
     document.getElementById("qtyInput").value = "";
   }
+
+  document.getElementById('downloadBillBtn').addEventListener('click', function () {
+    // Collect bill data from modal
+    const customer = document.getElementById('detailCustomer').innerText;
+    const mobile = document.getElementById('detailMobile').innerText;
+    const address = document.getElementById('detailAddress').innerText;
+    const date = document.getElementById('detailDate').innerText;
+    const total = parseFloat(document.getElementById('detailTotal').innerText);
+
+    // Collect table data from billItemsTable
+    const rows = document.querySelectorAll('#billItemsTable tr');
+    const billItems = [];
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        if (cols.length >= 5) {
+            billItems.push({
+                name: cols[0].innerText,
+                size: cols[1].innerText,
+                qty: parseFloat(cols[2].innerText),
+                price: parseFloat(cols[3].innerText.replace('₹','')),
+            });
+        }
+    });
+
+    const grandTotal = total;
+
+    // Escape HTML to avoid injection
+    const escapeHtml = (unsafe) => unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    // Build bill HTML in your custom format
+    let html = `
+      <div style="font-family:Arial, sans-serif;max-width:800px;padding:50px;border:1px solid #ccc;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h2 style="margin:0;">தீரன் PVC Panthal</h2>
+            <p style="margin:0;font-size:0.9rem;">Karumathampatti</p>
+            <p style="margin:0;font-size:0.9rem;"><strong>வாடிக்கையாளர்:</strong> ${escapeHtml(customer)}</p>
+            <p style="margin:0;font-size:0.9rem;"><strong>மொபைல்:</strong> ${escapeHtml(mobile)}</p>
+            <p style="margin:0;font-size:0.9rem;"><strong>முகவரி:</strong> ${escapeHtml(address)}</p>
+          </div>
+          <div style="text-align:right;">
+            <p style="margin:0;"><strong>தேதி:</strong> ${escapeHtml(date)}</p>
+          </div>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;margin-top:20px;font-size:0.9rem;">
+          <thead>
+            <tr style="background:#222;color:white;">
+              <th style="border:1px solid #999;padding:8px;">No</th>
+              <th style="border:1px solid #999;padding:8px;">பொருள் விளக்கம்</th>
+              <th style="border:1px solid #999;padding:8px;">அளவு</th>
+              <th style="border:1px solid #999;padding:8px;">விலை</th>
+              <th style="border:1px solid #999;padding:8px;">மொத்தம்</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    billItems.forEach((it, idx) => {
+      html += `
+        <tr>
+          <td style="border:1px solid #999;padding:8px;text-align:center;">${idx + 1}</td>
+          <td style="border:1px solid #999;padding:8px;">${escapeHtml(it.name)}${it.size ? ' - ' + escapeHtml(it.size) : ''}</td>
+          <td style="border:1px solid #999;padding:8px;text-align:center;">${it.qty}</td>
+          <td style="border:1px solid #999;padding:8px;text-align:right;">₹${it.price.toFixed(2)}</td>
+          <td style="border:1px solid #999;padding:8px;text-align:right;">₹${(it.price * it.qty).toFixed(2)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" style="border:1px solid #999;padding:8px;text-align:right;"><strong>Sub Total</strong></td>
+              <td style="border:1px solid #999;padding:8px;text-align:right;">₹${grandTotal.toFixed(2)}</td>
+            </tr>
+            <tr style="background:#222;color:white;">
+              <td colspan="4" style="border:1px solid #999;padding:8px;text-align:right;"><strong>TOTAL</strong></td>
+              <td style="border:1px solid #999;padding:8px;text-align:right;">₹${grandTotal.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    `;
+
+    // Generate PDF
+    html2pdf().set({
+        margin: 10,
+        filename: `bill_${date}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(html).save();
+  });
   // expose functions to window for inline onclick
   window.showPage = showPage;
   window.toggleSizeInputs = toggleSizeInputs;
