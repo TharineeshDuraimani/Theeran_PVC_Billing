@@ -6,63 +6,315 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  body{font-family:Arial;background:#f4f4f4;margin:0}
-  nav{background:#2c3e50;padding:1em;display:flex;flex-wrap:wrap;justify-content:space-between;color:white}
-  nav a{color:white;text-decoration:none;margin-left:50px;font-weight:bold;font-size:.9rem;cursor:pointer;margin-top: 100px;}
-  .container{padding:15px}
-  .section{background:white;padding:15px;border-radius:8px;margin-bottom:20px}
-  input,textarea,button,select{padding:10px;margin:5px 0;width:100%;max-width:100%;font-size:.95rem}
-  table{width:100%;border-collapse:collapse;margin-top:15px}
-  th,td{border:1px solid #999;padding:8px;font-size:.9rem}
-  #address{font-size-14px;}
-  th{background:#222;color:white}
-  .hidden{display:none}
-  .table-wrapper{overflow-x:auto}
-  .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:10px}
-  .modal-content{background:white;padding:15px;border-radius:8px;width:100%;max-width:400px;box-sizing:border-box}
-  .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px}
-  .item-card{background:#fff;padding:8px;border-radius:6px;text-align:center;font-size:.85rem;cursor:pointer;border:1px solid #ccc;transition:background .3s;box-shadow:0 2px 5px rgba(0,0,0,.05)}
-  .item-card img{width:100%;height:100px;object-fit:cover;border-radius:4px;margin-bottom:5px}
-  .item-card:hover{background:#f0f0f0}
-</style>
-<style>
-    /* Basic modal styles */
-    #itemModal {
-  display: none; /* Hide it initially */
+/* Base Styles */
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    margin: 0;
 }
 
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
+nav {
+    background: #2c3e50;
+    padding: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center; /* Vertically align items */
+    color: white;
+}
+
+nav h2 {
+    margin: 0; /* Remove default margin for better alignment */
+    font-size: 1.2rem;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px; /* Reduced margin for better spacing on all screens */
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.container {
+    padding: 15px;
+}
+
+.section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+input,
+textarea,
+button,
+select {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.95rem;
+    box-sizing: border-box; /* Ensures padding doesn't affect the width */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th,
+td {
+    border: 1px solid #999;
+    padding: 8px;
+    font-size: 0.85rem; /* Slightly smaller font for better fit */
+    text-align: left; /* Align text to the left for readability */
+}
+
+th {
+    background: #222;
+    color: white;
+}
+
+.table-wrapper {
+    overflow-x: auto; /* Allows horizontal scrolling for tables on small screens */
+}
+
+/* Hidden elements */
+.hidden {
+    display: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    z-index: 999;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 95%; /* Adjust width for small screens */
+    max-width: 400px;
+    max-height: 80%;
+    overflow-y: auto;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* Item Card Styles (within modal) */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.item-card {
+    background: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    transition: background 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.item-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.item-card:hover {
+    background: #f0f0f0;
+}
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 768px) {
+    /* Adjustments for tablets and large phones */
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    .modal.hidden {
-      display: none;
+
+    nav h2 {
+        margin-bottom: 10px;
     }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-height: 80%;
-      overflow-y: auto;
-      position: relative;
+
+    nav div {
+        display: flex;
+        flex-direction: row; /* Keep links in a row if possible */
+        flex-wrap: wrap;
+        margin-left: -20px; /* Counteract link margin */
     }
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 22px;
-      cursor: pointer;
+
+    nav a {
+        margin-top: 0;
+        margin-bottom: 5px;
+        margin-left: 20px;
     }
-    </style>
+
+    .container {
+        padding: 10px;
+    }
+
+    .section {
+        padding: 10px;
+    }
+
+    .item-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Smaller grid items */
+    }
+
+    /* Small font sizes for better fit on small screens */
+    th,
+    td,
+    input,
+    textarea,
+    button,
+    select,
+    .item-card {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Adjustments for smaller phones */
+    nav {
+        padding: 0.8em;
+    }
+
+    nav a {
+        font-size: 0.8rem;
+        margin-left: 10px; /* Tighter spacing */
+    }
+
+    h2,
+    h3,
+    h4 {
+        font-size: 1.1rem;
+    }
+
+    /* Stack navigation links vertically if they don't fit horizontally */
+    nav div {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    nav a {
+        margin: 5px 0;
+    }
+}
+@media (max-width: 768px) {
+    /* Adjustments for tablets and large phones */
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav h2 {
+        margin-bottom: 10px;
+    }
+
+    nav div {
+        display: flex;
+        flex-direction: row; /* Keep links in a row if possible */
+        flex-wrap: wrap;
+        margin-left: -20px; /* Counteract link margin */
+    }
+
+    nav a {
+        margin-top: 0;
+        margin-bottom: 5px;
+        margin-left: 20px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .section {
+        padding: 10px;
+    }
+
+    .item-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Smaller grid items */
+    }
+
+    /* Small font sizes for better fit on small screens */
+    th,
+    td,
+    input,
+    textarea,
+    button,
+    select,
+    .item-card {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Adjustments for smaller phones */
+    nav {
+        padding: 0.8em;
+    }
+
+    nav a {
+        font-size: 0.8rem;
+        margin-left: 10px; /* Tighter spacing */
+    }
+
+    h2,
+    h3,
+    h4 {
+        font-size: 1.1rem;
+    }
+
+    /* Stack navigation links vertically if they don't fit horizontally */
+    nav div {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    nav a {
+        margin: 5px 0;
+    }
+}
+</style>
 </head>
 <body>
 <nav>
